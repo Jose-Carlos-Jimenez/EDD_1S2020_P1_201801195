@@ -27,7 +27,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     ListaDoblementeEnlazada.h \
-    ListaEnlazada.h
+    ListaEnlazada.h \
+    Pila.h
 
 DISTFILES += \
     msg.txt

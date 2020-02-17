@@ -31,7 +31,9 @@ class ListaDoblementeEnlazada
         string getText();
         Nodo* getAt(int);
         void addAt(int, int, char);
+        void addAt(int,char);
         void deleteAt(int, int);
+        void deleteAt(int);
         void splitWords();
         void replace(string , string );
         void refreshList(string);
@@ -127,6 +129,21 @@ void ListaDoblementeEnlazada::addAt(int x, int y, char c)
     sizeElements++;
 }
 
+void ListaDoblementeEnlazada::addAt(int pos, char c)
+{
+    Nodo *nd = getAt(pos);
+    Nodo *nuevo = new Nodo();
+    Nodo *siguiente = nd->next;
+
+    nuevo->letter = c;//Añado el valor necesario.
+
+    nd->next = nuevo;//nd->nuevo
+    nuevo->next = siguiente;//nd->nuevo->siguiente
+    siguiente->prev = nuevo;//nuevo<-siguiente
+    nuevo->prev = nd;//nd<-nuevo<-prev
+    sizeElements++;
+}
+
 void ListaDoblementeEnlazada::splitWords()
 {
     Nodo *nd = first->next;
@@ -149,6 +166,16 @@ void ListaDoblementeEnlazada::splitWords()
 void ListaDoblementeEnlazada::deleteAt(int x, int y)
 {
     int pos = 166*y + x;
+    Nodo *nd = getAt(pos);
+    Nodo *ant = nd->prev;
+    ant->next = nd->next;
+    nd->next->prev = ant;
+    sizeElements--;
+    delete nd;
+}
+
+void ListaDoblementeEnlazada::deleteAt(int pos)
+{
     Nodo *nd = getAt(pos);
     Nodo *ant = nd->prev;
     ant->next = nd->next;

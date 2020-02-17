@@ -2,21 +2,23 @@
 #include <windows.h>
 #include <fstream>
 #include <conio.h>
-#include <ListaDoblementeEnlazada.h>
 #include <iostream>
 #include <string>
+#include <ListaDoblementeEnlazada.h>
+#include <Pila.h>
 
 #define ARRIBA 9
 #define IZQUIERDA 10
 #define DERECHA 12
 #define ABAJO 11
-#define SALIR 18
+#define CANCELAR 24
 #define BORRAR 8
+#define BUSCAR 23
+#define DESHACER 26
+#define REHACER 25
 
 using namespace std;
 
-
-/*INICIO DE LOS MÉTODOS DEL PROGRAMA*/
 void AltEnter()
 {
     keybd_event(VK_MENU,0x38,0,0);
@@ -81,6 +83,28 @@ bool outSystem( bool backToMenu)
     paintRectangle();
     return back;
 };
+
+void revertChange(ListaDoblementeEnlazada* letters , Pila *changes, Pila *reverts)
+{
+    if(changes->tamanio > 0)
+    {
+        Cambio *last = changes->last;
+        cout<<last->palabra;
+        reverts->push(last);
+        if(last->tipo == 1)
+        {
+            letters->deleteAt(last->posicion);
+        }
+        else if(last->tipo == 2)
+        {
+            letters->addAt(last->posicion, last->palabra);
+        }
+        else if(last->tipo == 3)
+        {
+            letters->replace(last->palabraReemplazada, last->palabraBuscada);
+        }
+    }
+}
 
 void paintMenu()
 {
@@ -158,7 +182,7 @@ void partirCaracteres(ListaDoblementeEnlazada * letters)
 
 }
 
-void pintarBR(ListaDoblementeEnlazada *letters)
+void pintarBR(ListaDoblementeEnlazada *letters, Pila *changes)
 {
     string remp;
     system("cls");
@@ -186,6 +210,7 @@ void pintarBR(ListaDoblementeEnlazada *letters)
             palabra2 += remp[i];
         }
     }
+    changes->push(palabra1, palabra2,false,0,0,3);
     letters->replace(palabra1, palabra2);
     string numero = to_string(letters->cambios);
     cout<< "!SE HAN REEMPLAZADO "+ palabra1 +" POR "+ palabra2 +" "+ numero + " VECES!\n";
@@ -193,7 +218,7 @@ void pintarBR(ListaDoblementeEnlazada *letters)
     imprimirEnPantalla(letters);
 }
 
-void editArea(ListaDoblementeEnlazada* letters)
+void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts)
 {
     system("color F0");
     int x = 0; int y = 0;
@@ -211,6 +236,9 @@ void editArea(ListaDoblementeEnlazada* letters)
                 if(letters->sizeElements > 0 && (x!=0 || y != 0))
                 {
                     letters->deleteAt(x,y);
+                    int posicion = 166*y+x;
+                    char borrado = letters->getAt(posicion)->letter;
+                    changes->push("","",false,borrado,posicion,2);
                     imprimirEnPantalla(letters);
                     if(x==0 && y>0)
                     {
@@ -224,13 +252,22 @@ void editArea(ListaDoblementeEnlazada* letters)
                     gotoxy(x,y);
                 }
             }
-            else if( c == 23)
+            else if( c == BUSCAR)/*BUSCAR Y REEMPLAZAR*/
             {
-                pintarBR(letters);
+                pintarBR(letters, changes);
             }
-            else if ( c == SALIR )
+            else if( c == DESHACER)
+            {
+                revertChange(letters, changes, reverts);
+                imprimirEnPantalla(letters);
+            }
+            else if ( c == CANCELAR )
             {
                 /*SALIR AL MENÚ PRINCIPAL*/
+                letters->first->next = letters->last;
+                letters->last->prev = letters->first;
+                letters->sizeElements = 0;
+                //changes->~Pila();
                 system("color 5F");
                 editando = false;
                 system("cls");
@@ -303,6 +340,13 @@ void editArea(ListaDoblementeEnlazada* letters)
                 {
                     letters->addAt(x,y,c);
                 }
+
+
+                /*AGREGAR A LA PILA DE CAMBIOS*/
+                int pos = 166*y + x;
+                changes->push("", "", false, c, pos, 1);
+
+
                 /*CONTROLADOR DE POSICION DEL PUNTERO*/
                 if( x == 165 )
                 {
@@ -326,6 +370,8 @@ int main() {
     paintMenu();
     system("Color 5F");
     ListaDoblementeEnlazada letters = ListaDoblementeEnlazada();
+    Pila changes = Pila();
+    Pila reverts = Pila();
 
     while(running)
     {
@@ -335,7 +381,8 @@ int main() {
              if(c == '1')
              {
                  system("cls");
-                 editArea(&letters);
+                 imprimirEnPantalla(&letters);
+                 editArea(&letters, &changes, &reverts);
              }
              else if(c == '2')
              {
