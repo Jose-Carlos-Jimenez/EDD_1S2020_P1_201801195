@@ -16,7 +16,7 @@
 using namespace std;
 
 
-/*INICIO DE LOS MÉTODOS DEL PROGRAMA*/
+/*INICIO DE LOS MÉTODOS DEL PROGRAMA */
 void AltEnter()
 {
     keybd_event(VK_MENU,0x38,0,0);
