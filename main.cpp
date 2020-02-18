@@ -88,20 +88,24 @@ void revertChange(ListaDoblementeEnlazada* letters , Pila *changes, Pila *revert
 {
     if(changes->tamanio > 0)
     {
-        Cambio *last = changes->last;
-        cout<<last->palabra;
-        reverts->push(last);
-        if(last->tipo == 1)
+        Cambio *last = changes->pop();
+        if(last!=NULL)
         {
-            letters->deleteAt(last->posicion);
-        }
-        else if(last->tipo == 2)
-        {
-            letters->addAt(last->posicion, last->palabra);
-        }
-        else if(last->tipo == 3)
-        {
-            letters->replace(last->palabraReemplazada, last->palabraBuscada);
+            reverts->push(last);
+            int tipo = last->tipo;
+            if(tipo == 1)
+            {
+                int pos = last->posicion;
+                letters->deleteAt(pos);
+            }
+            else if(tipo == 2)
+            {
+                letters->addAt(last->posicion, last->palabra);
+            }
+            else if(tipo == 3)
+            {
+                letters->replace(last->palabraReemplazada, last->palabraBuscada);
+            }
         }
     }
 }
@@ -235,22 +239,22 @@ void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts)
                 /*¡BOOORRRAR!*/
                 if(letters->sizeElements > 0 && (x!=0 || y != 0))
                 {
-                    letters->deleteAt(x,y);
                     int posicion = 166*y+x;
                     char borrado = letters->getAt(posicion)->letter;
-                    changes->push("","",false,borrado,posicion,2);
-                    imprimirEnPantalla(letters);
-                    if(x==0 && y>0)
-                    {
-                        x = 166;
-                        y--;
-                    }
-                    else
-                    {
-                        x--;
-                    }
-                    gotoxy(x,y);
+                    changes->push("NULL","NULL",false,borrado,posicion,2);
+                    letters->deleteAt(x,y);
                 }
+                imprimirEnPantalla(letters);
+                if(x==0 && y>0)
+                {
+                    x = 166;
+                    y--;
+                }
+                else
+                {
+                    x--;
+                }
+                gotoxy(x,y);
             }
             else if( c == BUSCAR)/*BUSCAR Y REEMPLAZAR*/
             {
@@ -258,8 +262,30 @@ void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts)
             }
             else if( c == DESHACER)
             {
-                revertChange(letters, changes, reverts);
-                imprimirEnPantalla(letters);
+                if(changes->tamanio > 0 && letters->sizeElements > 0)
+                {
+                    int tipo = changes->cima->tipo;
+                    if(tipo== 1)/*SI VOY A BORRAR DISMINUYO COORDENADS.*/
+                    {
+                        if(x==0 && y>0)
+                        {
+                            x = 166;
+                            y--;
+                        }
+                        else
+                        {
+                            x--;
+                        }
+                        gotoxy(x,y);
+                    }
+                    else if( tipo == 2)/*SI VOY A AGREGAR AUMENTO COORDENADAS*/
+                    {
+
+                    }
+
+                    revertChange(letters, changes, reverts);
+                    imprimirEnPantalla(letters);
+                }
             }
             else if ( c == CANCELAR )
             {
@@ -331,21 +357,19 @@ void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts)
             }
             else/*AGREGAR CARACTERES*/
             {
+                int pos = 166*y + x + 1;
+
                 /*AGREGAR LOS CARACTERES NO DEFINIDOS*/
                 if(letters->sizeElements ==0)
                 {
                     letters->addLast(c);
+                    changes->push("", "", false, c, pos, 1);
                 }
                 else
                 {
                     letters->addAt(x,y,c);
+                    changes->push("", "", false, c, pos, 1);
                 }
-
-
-                /*AGREGAR A LA PILA DE CAMBIOS*/
-                int pos = 166*y + x;
-                changes->push("", "", false, c, pos, 1);
-
 
                 /*CONTROLADOR DE POSICION DEL PUNTERO*/
                 if( x == 165 )

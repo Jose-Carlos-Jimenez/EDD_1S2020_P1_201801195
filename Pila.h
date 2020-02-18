@@ -15,38 +15,28 @@ public:
     char palabra;
     int posicion;
     int tipo;
-    Cambio *abajo;
+    Cambio *siguiente;
 };
 
 class Pila
 {
 public:
 
-    Pila();
+    Pila(): cima(NULL){};
     ~Pila();
-    Cambio *first;
-    Cambio *last;
+    Cambio *cima;
     int tamanio;
     void push(string, string, bool, char, int, int);
     void push(Cambio*);
     Cambio* pop();
 };
 
-Pila::Pila()
-{
-    tamanio = 0;
-    first = new Cambio();
-    last = new Cambio();
-    last->abajo = first;
-}
-
 Pila::~Pila(){
-    Cambio *pointer = last;
-    while(pointer->abajo != first)
+    Cambio *cm = cima;
+    while(cm->siguiente != NULL)
     {
-        Cambio *nd =pointer;
-        pointer = pointer->abajo;
-        delete  nd;
+        delete cm;
+        cm = cm->siguiente;
     }
 }
 
@@ -54,48 +44,51 @@ void Pila::push(string palabraBuscada, string palabraReeemplazada, bool estado
                 , char palabra, int posicion, int tipo)
 {
     Cambio *nuevo = new Cambio();
+    /* Crear un nodo nuevo */
     nuevo->palabraBuscada = palabraBuscada;
     nuevo->palabraReemplazada = palabraReeemplazada;
     nuevo->estado = estado;
     nuevo->palabra = palabra;
     nuevo->posicion = posicion;
     nuevo->tipo = tipo;
-
-    if(tamanio > 0)
+    /* Ahora, el comienzo de nuestra pila es en nuevo nodo */
+    if(!cima)
     {
-        nuevo->abajo = last;
-        last = nuevo;
+        cima = nuevo;
     }
     else
     {
-        nuevo->abajo = last;
-        last = nuevo;
+        Cambio *referencia = cima;
+        nuevo->siguiente = referencia;
+        cima = nuevo;
+        tamanio++;
     }
-    tamanio++;
 }
 
-void Pila::push(Cambio* nuevo)
+void Pila::push(Cambio *nuevo)
 {
-
-
-    if(tamanio > 0)
+    if(!cima)
     {
-     nuevo->abajo = first;
-     last = nuevo;
+        cima = nuevo;
     }
     else
     {
-     nuevo->abajo = last;
-     last = nuevo;
+        Cambio *puntero = cima;
+        nuevo->siguiente = puntero;
+        cima = nuevo;
     }
-    tamanio++;
 }
 
 Cambio* Pila::pop()
 {
-    Cambio *referencia = last;
-    last->abajo = last->abajo;
-    return  referencia;
+    if(tamanio > 0)
+    {
+        Cambio *nodo = cima;
+        cima = nodo->siguiente;
+        tamanio--;
+        return nodo;
+    }
+    return cima;
 }
 
 
