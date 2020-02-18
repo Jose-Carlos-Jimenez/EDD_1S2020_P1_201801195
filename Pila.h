@@ -28,16 +28,20 @@ public:
     int tamanio;
     void push(string, string, bool, char, int, int);
     void push(Cambio*);
+    void emptyStack();
     Cambio* pop();
 };
 
 Pila::~Pila(){
-    Cambio *cm = cima;
-    while(cm->siguiente != NULL)
+    while(cima)
     {
-        delete cm;
-        cm = cm->siguiente;
+        pop();
     }
+}
+
+void Pila::emptyStack()
+{
+    cima = NULL;
 }
 
 void Pila::push(string palabraBuscada, string palabraReeemplazada, bool estado
@@ -77,6 +81,7 @@ void Pila::push(Cambio *nuevo)
         nuevo->siguiente = puntero;
         cima = nuevo;
     }
+    tamanio++;
 }
 
 Cambio* Pila::pop()

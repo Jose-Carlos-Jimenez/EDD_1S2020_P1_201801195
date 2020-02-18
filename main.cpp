@@ -4,6 +4,8 @@
 #include <conio.h>
 #include <iostream>
 #include <string>
+#include <direct.h>
+
 #include <ListaDoblementeEnlazada.h>
 #include <Pila.h>
 
@@ -16,6 +18,7 @@
 #define BUSCAR 23
 #define DESHACER 26
 #define REHACER 25
+#define GUARDAR 19
 
 using namespace std;
 
@@ -84,15 +87,44 @@ bool outSystem( bool backToMenu)
     return back;
 };
 
+void returnChange(ListaDoblementeEnlazada* letters , Pila *changes, Pila *reverts)
+{
+    if(reverts->tamanio > 0)
+    {
+        Cambio *last = reverts->pop();
+        last->estado = false;
+        if(last!=NULL)
+        {
+            changes->push(last);
+            int tipo = last->tipo;
+            if(tipo == 1)
+            {
+                int pos = last->posicion;
+                char palabra = last->palabra;
+                letters->addAt(pos-1, palabra);
+            }
+            else if(tipo == 2)
+            {
+                int pos = last->posicion;
+                letters->deleteAt(pos);
+            }
+            else if(tipo == 3)
+            {
+                letters->replace(last->palabraBuscada, last->palabraReemplazada);
+            }
+        }
+    }
+}
+
 void revertChange(ListaDoblementeEnlazada* letters , Pila *changes, Pila *reverts)
 {
     if(changes->tamanio > 0)
     {
         Cambio *last = changes->pop();
+        last->estado = true;
         reverts->push(last);
         if(last!=NULL)
         {
-            reverts->push(last);
             int tipo = last->tipo;
             if(tipo == 1)
             {
@@ -225,6 +257,28 @@ void pintarBR(ListaDoblementeEnlazada *letters, Pila *changes)
     imprimirEnPantalla(letters);
 }
 
+/*void save(ListaDoblementeEnlazada *letters)
+{
+    system("cls");
+    cout<<"Nombre del archivo :";
+    string directory;
+    getline(cin, directory);
+    //__________________________________________________________________________
+
+    ofstream archivo;
+    archivo.open("C:/prueba.txt",ios::out);
+
+    if(archivo.fail()){
+        cout<<"No se pudo abrir el archivo.";
+    }
+    archivo << letters->getText();
+    archivo.close();
+    //__________________________________________________________________________
+    cout << "SE HA FINALIZADO LA ESCRITURA DE ARCHIVOS";
+    Sleep(1000);
+    imprimirEnPantalla(letters);
+}*/
+
 void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts)
 {
     system("color F0");
@@ -262,6 +316,43 @@ void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts)
             else if( c == BUSCAR)/*BUSCAR Y REEMPLAZAR*/
             {
                 pintarBR(letters, changes);
+            }
+            else if( c == REHACER )/*<----------------------REHACER LA ULTIMA ACCIÓN DESECHA---------------------------->*/
+            {
+                int tamanio = reverts->tamanio;
+                if(tamanio > 0 && reverts->cima != NULL)
+                {
+                    int tipo = reverts->cima->tipo;
+
+                    if(tipo == 1)
+                    {
+                        if( x == 165 )
+                        {
+                            x = 0;
+                            y++;
+                        }
+                        else
+                        {
+                            x++;
+                        }
+                        gotoxy(x,y);
+                    }
+                    else if(tipo == 2)
+                    {
+                        if(x==0 && y>0)
+                        {
+                            x = 166;
+                            y--;
+                        }
+                        else
+                        {
+                            x--;
+                        }
+                        gotoxy(x,y);
+                    }
+                    returnChange(letters,changes, reverts);
+                    imprimirEnPantalla(letters);
+                }
             }
             else if( c == DESHACER)/*<-----------------------DESHACER LA ULTIMA ACCIÓN---------------------------------->*/
             {
@@ -307,7 +398,8 @@ void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts)
                 letters->first->next = letters->last;
                 letters->last->prev = letters->first;
                 letters->sizeElements = 0;
-                //changes->~Pila();
+                changes->emptyStack()   ;
+                reverts->emptyStack();
                 system("color 5F");
                 editando = false;
                 system("cls");
@@ -369,6 +461,10 @@ void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts)
                     }
                 }
             }
+            else if(c == GUARDAR)
+            {
+                save(letters);
+            }
             else/*AGREGAR CARACTERES*/
             {
                 int pos = 166*y + x + 1;
@@ -378,11 +474,13 @@ void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts)
                 {
                     letters->addLast(c);
                     changes->push("NULL", "NULL", false, c, pos, 1);
+                    reverts->emptyStack();
                 }
                 else
                 {
                     letters->addAt(x,y,c);
-                    changes->push("", "", false, c, pos, 1);
+                    changes->push("NULL", "NULL", false, c, pos, 1);
+                    reverts->emptyStack();
                 }
 
                 /*CONTROLADOR DE POSICION DEL PUNTERO*/
