@@ -1,6 +1,5 @@
 #include <string>
 #include <iostream>
-#include <ListaEnlazada.h>
 
 using namespace std;
 
@@ -22,7 +21,6 @@ class ListaDoblementeEnlazada
         Nodo *last;
         int cambios;
         int sizeElements;
-        ListaEnlazada *words;
 
         ListaDoblementeEnlazada();
         ~ListaDoblementeEnlazada();
@@ -41,7 +39,6 @@ class ListaDoblementeEnlazada
 
 ListaDoblementeEnlazada::ListaDoblementeEnlazada()
 {
-    this->words = new ListaEnlazada();
     sizeElements = 0;
     first = new Nodo();
     last = new Nodo();

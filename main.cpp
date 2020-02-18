@@ -8,6 +8,7 @@
 
 #include <ListaDoblementeEnlazada.h>
 #include <Pila.h>
+#include <ListaCircularSimple.h>
 
 #define ARRIBA 9
 #define IZQUIERDA 10
@@ -257,29 +258,113 @@ void pintarBR(ListaDoblementeEnlazada *letters, Pila *changes)
     imprimirEnPantalla(letters);
 }
 
-/*void save(ListaDoblementeEnlazada *letters)
+void save(ListaDoblementeEnlazada *letters, ListaCircularSimple *rutas)
 {
     system("cls");
     cout<<"Nombre del archivo :";
     string directory;
-    getline(cin, directory);
+    cin>>directory;
     //__________________________________________________________________________
-
-    ofstream archivo;
-    archivo.open("C:/prueba.txt",ios::out);
-
-    if(archivo.fail()){
-        cout<<"No se pudo abrir el archivo.";
+    string absolute_path = "C:/Users/jose5/Documents/EDD/" + directory;
+    fstream archivo;
+    archivo.open(absolute_path, ios::out);
+    if(!archivo.fail()){
+        rutas->add(absolute_path, directory);
     }
-    archivo << letters->getText();
+    string texto = letters->getText();
+    archivo << texto;
     archivo.close();
     //__________________________________________________________________________
     cout << "SE HA FINALIZADO LA ESCRITURA DE ARCHIVOS";
     Sleep(1000);
     imprimirEnPantalla(letters);
-}*/
+}
 
-void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts)
+void openText(ListaDoblementeEnlazada* letters, string* texto)
+{
+    cout<< "Ingrese la ruta del archivo: ";
+    cin >> *texto;
+    fstream archive;
+    string line;
+    if(!archive.is_open())
+    {
+        archive.open(*texto, ios::in);
+    }
+    string nuevo;
+    while(std::getline(archive, line))
+    {
+        nuevo += line;
+    }
+    for(int i = 0; i< int(nuevo.size()); i++)
+    {
+        letters->addLast(nuevo[i]);
+    }
+    system("cls");
+}
+
+void recentFiles(ListaCircularSimple* rutas, ListaDoblementeEnlazada* letters)
+{
+    system("cls");
+    bool searching = true;
+    Ruta *pointer = rutas->first->siguiente;
+    cout<<"Seleccione el archivo que desea abrir o presione ^X para regresar\n\n\n";
+    int i = 0;
+    while(pointer != rutas->first)
+    {
+        cout << to_string(i)+") " + pointer -> nombre + "\n";
+        cout << pointer-> ruta + "\n\n";
+        pointer = pointer->siguiente;
+        i++;
+    }
+    while(searching)
+    {
+        if(kbhit())
+        {
+            char c = getch();
+            if(c == 24)
+            {
+                /*SALIR AL MENÚ PRINCIPAL*/
+                system("color 5F");
+                searching = false;
+                system("cls");
+                paintMenu();
+            }
+            else
+            {
+                int opcion;
+                cout<< "Ingrese el archivo que desea abrir: ";
+                cin >> opcion;
+                cout<< "\n";
+                Ruta *open = rutas->first->siguiente;
+                for(int i = 0; i < opcion;i++)
+                {
+                    open = open->siguiente;
+                }
+
+                fstream archive(open->nombre);
+                string line;
+                if(!archive.is_open())
+                {
+                    archive.open(open->ruta, ios::in);
+                }
+                string nuevo;
+                while(std::getline(archive, line))
+                {
+                    nuevo += line;
+                }
+                for(int i = 0; i< int(nuevo.size()); i++)
+                {
+                    letters->addLast(nuevo[i]);
+                }
+                system("cls");
+                searching = false;
+            }
+        }
+    }
+}
+
+
+void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts, ListaCircularSimple* rutas)
 {
     system("color F0");
     int x = 0; int y = 0;
@@ -463,7 +548,7 @@ void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts)
             }
             else if(c == GUARDAR)
             {
-                save(letters);
+                save(letters, rutas);
             }
             else/*AGREGAR CARACTERES*/
             {
@@ -508,6 +593,8 @@ int main() {
     ListaDoblementeEnlazada letters = ListaDoblementeEnlazada();
     Pila changes = Pila();
     Pila reverts = Pila();
+    ListaCircularSimple rutas = ListaCircularSimple();
+    string ruta;
 
     while(running)
     {
@@ -518,15 +605,26 @@ int main() {
              {
                  system("cls");
                  imprimirEnPantalla(&letters);
-                 editArea(&letters, &changes, &reverts);
+                 editArea(&letters, &changes, &reverts, &rutas);
              }
              else if(c == '2')
              {
-
+                 system("cls");
+                 openText(&letters, &ruta);
+                 if(letters.sizeElements > 0)
+                 {
+                     imprimirEnPantalla(&letters);
+                     editArea(&letters, &changes, &reverts, &rutas);
+                 }
              }
              else if(c == '3')
              {
-
+                 recentFiles(&rutas, &letters);
+                 if(letters.sizeElements>0)
+                 {
+                     imprimirEnPantalla(&letters);
+                     editArea(&letters, &changes, &reverts, &rutas);
+                 }
              }
              else if(c == '4')
              {

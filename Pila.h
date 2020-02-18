@@ -2,7 +2,7 @@
 #define PILA_H
 
 #include <string>
-#include <ListaDoblementeEnlazada.h>
+#include <ListaEnlazada.h>
 
 using namespace std;
 

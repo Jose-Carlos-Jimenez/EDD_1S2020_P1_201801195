@@ -7,6 +7,7 @@ using namespace std;
 class Word{
     public:
     string word;
+    int pos;
     Word *next;
 };
 
@@ -25,7 +26,7 @@ public:
 
 ListaEnlazada::ListaEnlazada()
 {
-    this->first = new Word();
+    first = last = NULL;
     size = 0;
 }
 
@@ -36,23 +37,27 @@ ListaEnlazada::~ListaEnlazada()
 
 void ListaEnlazada::addWord(string newWord)
 {
-    Word *nd = new Word();
-    nd->word = newWord;
+    Word *nuevaPalabra = new Word();
+    nuevaPalabra->word = newWord;
+    nuevaPalabra->pos = size;
+
+
     if(size == 0)
     {
-        first->next = nd;
+        first->next = nuevaPalabra;
+        nuevaPalabra->next = last;
     }
     else
     {
-        Word *pointer = first;
-        while(pointer->next != last)
+        Word *aux = first->next;
+        while(aux->word[0] > newWord[0])
         {
-            pointer = pointer->next;
+            aux = aux->next;
         }
-        pointer->next = nd;
-        nd->next = last;
+        Word *refGuardada = aux->next;
+        aux->next = nuevaPalabra;
+        nuevaPalabra->next = refGuardada;
     }
-    size++;
 }
 
 #endif // LISTAENLAZADA_H
