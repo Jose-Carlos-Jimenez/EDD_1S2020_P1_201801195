@@ -22,15 +22,24 @@ class Pila
 {
 public:
 
-    Pila(): cima(NULL){};
     ~Pila();
+    ListaEnlazada *buscadas;
+    ListaEnlazada *reemplazadas;
     Cambio *cima;
+    Pila();
     int tamanio;
     void push(string, string, bool, char, int, int);
     void push(Cambio*);
     void emptyStack();
     Cambio* pop();
 };
+
+Pila::Pila()
+{
+    buscadas= new ListaEnlazada();
+    reemplazadas = new ListaEnlazada();
+    cima = NULL;
+}
 
 Pila::~Pila(){
     while(cima)
@@ -67,6 +76,18 @@ void Pila::push(string palabraBuscada, string palabraReeemplazada, bool estado
         cima = nuevo;
         tamanio++;
     }
+
+    if(nuevo->estado == true && palabraBuscada != "NULL")
+    {
+        reemplazadas->addWord(palabraBuscada,palabraReeemplazada);
+    }
+    else
+    {
+        if(palabraBuscada!= "NULL")
+        {
+            buscadas->addWord(palabraBuscada, palabraReeemplazada);
+        }
+    }
 }
 
 void Pila::push(Cambio *nuevo)
@@ -80,6 +101,17 @@ void Pila::push(Cambio *nuevo)
         Cambio *puntero = cima;
         nuevo->siguiente = puntero;
         cima = nuevo;
+    }
+    if(nuevo->estado == true && nuevo->palabraBuscada != "NULL")
+    {
+        reemplazadas->addWord(nuevo->palabraBuscada,nuevo->palabraReemplazada);
+    }
+    else
+    {
+        if(nuevo->palabraBuscada!= "NULL")
+        {
+            buscadas->addWord(nuevo->palabraBuscada, nuevo->palabraReemplazada);
+        }
     }
     tamanio++;
 }

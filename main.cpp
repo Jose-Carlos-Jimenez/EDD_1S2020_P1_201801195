@@ -20,6 +20,7 @@
 #define DESHACER 26
 #define REHACER 25
 #define GUARDAR 19
+#define IMPRIMIR 17
 
 using namespace std;
 
@@ -376,27 +377,30 @@ void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts, Li
         if(kbhit())
         {
             char c = getch();//CARACTER QUE ES PULSADO
-            if ( c == BORRAR)
+            if ( c == BORRAR )
             {
-                /*¡BOOORRRAR!*/
-                if(letters->sizeElements > 0 && (x!=0 || y != 0))
+                if(x != 0 || y != 0)
                 {
-                    int posicion = 166*y+x;
-                    char borrado = letters->getAt(posicion)->letter;
-                    changes->push("NULL","NULL",false,borrado,posicion,2);
-                    letters->deleteAt(x,y);
+                    /*¡BOOORRRAR!*/
+                    if(letters->sizeElements > 0 && (x!=0 || y != 0))
+                    {
+                        int posicion = 166*y+x;
+                        char borrado = letters->getAt(posicion)->letter;
+                        changes->push("NULL","NULL",false,borrado,posicion,2);
+                        letters->deleteAt(x,y);
+                    }
+                    imprimirEnPantalla(letters);
+                    if(x==0 && y>0)
+                    {
+                        x = 166;
+                        y--;
+                    }
+                    else
+                    {
+                        x--;
+                    }
+                    gotoxy(x,y);
                 }
-                imprimirEnPantalla(letters);
-                if(x==0 && y>0)
-                {
-                    x = 166;
-                    y--;
-                }
-                else
-                {
-                    x--;
-                }
-                gotoxy(x,y);
             }
             else if( c == BUSCAR)/*BUSCAR Y REEMPLAZAR*/
             {
@@ -441,7 +445,7 @@ void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts, Li
             }
             else if( c == DESHACER)/*<-----------------------DESHACER LA ULTIMA ACCIÓN---------------------------------->*/
             {
-                if(changes->tamanio > 0 && letters->sizeElements > 0)
+                if(changes->tamanio > 0 && letters->sizeElements > 0 && changes->cima != NULL)
                 {
                     int tipo = changes->cima->tipo;
 
@@ -549,6 +553,11 @@ void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts, Li
             else if(c == GUARDAR)
             {
                 save(letters, rutas);
+            }
+            else if(c == IMPRIMIR)
+            {
+                changes->reemplazadas->print();
+                changes->buscadas->print();
             }
             else/*AGREGAR CARACTERES*/
             {

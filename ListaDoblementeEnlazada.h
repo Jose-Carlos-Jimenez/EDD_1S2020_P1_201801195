@@ -141,7 +141,7 @@ void ListaDoblementeEnlazada::addAt(int pos, char c)
     sizeElements++;
 }
 
-void ListaDoblementeEnlazada::splitWords()
+/*void ListaDoblementeEnlazada::splitWords()
 {
     Nodo *nd = first->next;
     string aux;
@@ -158,7 +158,7 @@ void ListaDoblementeEnlazada::splitWords()
         }
         nd = nd->next;
     }
-}
+}*/
 
 void ListaDoblementeEnlazada::deleteAt(int x, int y)
 {
