@@ -89,6 +89,7 @@ void revertChange(ListaDoblementeEnlazada* letters , Pila *changes, Pila *revert
     if(changes->tamanio > 0)
     {
         Cambio *last = changes->pop();
+        reverts->push(last);
         if(last!=NULL)
         {
             reverts->push(last);
@@ -100,7 +101,9 @@ void revertChange(ListaDoblementeEnlazada* letters , Pila *changes, Pila *revert
             }
             else if(tipo == 2)
             {
-                letters->addAt(last->posicion, last->palabra);
+                int pos = last->posicion;
+                char palabra = last->palabra;
+                letters->addAt(pos-1, palabra);
             }
             else if(tipo == 3)
             {
@@ -260,11 +263,12 @@ void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts)
             {
                 pintarBR(letters, changes);
             }
-            else if( c == DESHACER)
+            else if( c == DESHACER)/*<-----------------------DESHACER LA ULTIMA ACCIÓN---------------------------------->*/
             {
                 if(changes->tamanio > 0 && letters->sizeElements > 0)
                 {
                     int tipo = changes->cima->tipo;
+
                     if(tipo== 1)/*SI VOY A BORRAR DISMINUYO COORDENADS.*/
                     {
                         if(x==0 && y>0)
@@ -278,9 +282,19 @@ void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts)
                         }
                         gotoxy(x,y);
                     }
+
                     else if( tipo == 2)/*SI VOY A AGREGAR AUMENTO COORDENADAS*/
                     {
-
+                        if( x == 165 )
+                        {
+                            x = 0;
+                            y++;
+                        }
+                        else
+                        {
+                            x++;
+                        }
+                        gotoxy(x,y);
                     }
 
                     revertChange(letters, changes, reverts);
@@ -363,7 +377,7 @@ void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts)
                 if(letters->sizeElements ==0)
                 {
                     letters->addLast(c);
-                    changes->push("", "", false, c, pos, 1);
+                    changes->push("NULL", "NULL", false, c, pos, 1);
                 }
                 else
                 {
