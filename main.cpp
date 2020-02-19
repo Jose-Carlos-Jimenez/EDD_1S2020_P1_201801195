@@ -20,7 +20,8 @@
 #define DESHACER 26
 #define REHACER 25
 #define GUARDAR 19
-#define IMPRIMIR 17
+#define REPORTAR 18
+
 
 using namespace std;
 
@@ -197,7 +198,7 @@ void imprimirEnPantalla(ListaDoblementeEnlazada *letters)
     gotoxy(166,y+8);
     printf("%c",188);
     gotoxy(45,y+9);
-    cout << "^w (Buscar y reemplazar)      ^c (Reportes)       ^s (Guardar)";
+    cout << "^w (Buscar y reemplazar)      ^r (Reportes)       ^s (Guardar)";
     gotoxy(x, y);
 }
 
@@ -303,6 +304,44 @@ void openText(ListaDoblementeEnlazada* letters, string* texto)
     system("cls");
 }
 
+void reports(ListaDoblementeEnlazada* letters, Pila* changes)
+{
+    system("cls");
+    bool report = true;
+    string instructions = "1. Lista\n2. Palabras buscadas\n3. Palabras ordenadas\n Opcion: ";
+    cout << instructions;
+    while(report)
+    {
+        if(kbhit())
+        {
+            char c = getch();
+            if(c == 49)
+            {
+                letters->graph();
+
+            }
+            else if(c == 50)
+            {
+                if(changes->cima)
+                {
+                    changes->buscadas->graph();
+                }
+            }
+            else if(c == 51)
+            {
+                if(changes->cima)changes->buscadas->graphOther();
+            }
+            else if(c == CANCELAR)
+            {
+                report = false;
+            }
+            report = false;
+        }
+
+    }
+
+}
+
 void recentFiles(ListaCircularSimple* rutas, ListaDoblementeEnlazada* letters)
 {
     system("cls");
@@ -317,6 +356,7 @@ void recentFiles(ListaCircularSimple* rutas, ListaDoblementeEnlazada* letters)
         pointer = pointer->siguiente;
         i++;
     }
+    cout<<"Presiona x para ver el reporte de rutas.";
     while(searching)
     {
         if(kbhit())
@@ -329,6 +369,10 @@ void recentFiles(ListaCircularSimple* rutas, ListaDoblementeEnlazada* letters)
                 searching = false;
                 system("cls");
                 paintMenu();
+            }
+            else if(c == 'x')
+            {
+                rutas->graph();
             }
             else
             {
@@ -404,7 +448,10 @@ void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts, Li
             }
             else if( c == BUSCAR)/*BUSCAR Y REEMPLAZAR*/
             {
-                pintarBR(letters, changes);
+                if(letters->sizeElements > 0)
+                {
+                    pintarBR(letters, changes);
+                }
             }
             else if( c == REHACER )/*<----------------------REHACER LA ULTIMA ACCIÓN DESECHA---------------------------->*/
             {
@@ -554,10 +601,15 @@ void editArea(ListaDoblementeEnlazada* letters, Pila* changes, Pila* reverts, Li
             {
                 save(letters, rutas);
             }
-            else if(c == IMPRIMIR)
+            else if(c == REPORTAR)
             {
-                changes->reemplazadas->print();
-                changes->buscadas->print();
+                reports(letters, changes);
+                imprimirEnPantalla(letters);
+                gotoxy(x,y);
+            }
+            else if( c == 18)
+            {
+                changes->graph();
             }
             else/*AGREGAR CARACTERES*/
             {
@@ -625,15 +677,30 @@ int main() {
                      imprimirEnPantalla(&letters);
                      editArea(&letters, &changes, &reverts, &rutas);
                  }
+                 else
+                 {
+                     paintMenu();
+                 }
              }
              else if(c == '3')
              {
-                 recentFiles(&rutas, &letters);
-                 if(letters.sizeElements>0)
+                 if(rutas.size >= 0)
                  {
-                     imprimirEnPantalla(&letters);
-                     editArea(&letters, &changes, &reverts, &rutas);
+                     recentFiles(&rutas, &letters);
+                     if(letters.sizeElements>0)
+                     {
+                         imprimirEnPantalla(&letters);
+                         editArea(&letters, &changes, &reverts, &rutas);
+                     }
                  }
+                 else
+                 {
+                     system("cls");
+                     cout<<"Aun no has guardado archivos";
+                     Sleep(1500);
+                 }
+                 system("cls");
+                 paintMenu();
              }
              else if(c == '4')
              {

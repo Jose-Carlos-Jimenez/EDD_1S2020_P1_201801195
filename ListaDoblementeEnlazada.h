@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -35,6 +36,7 @@ class ListaDoblementeEnlazada
         void splitWords();
         void replace(string , string );
         void refreshList(string);
+        void graph();
 };
 
 ListaDoblementeEnlazada::ListaDoblementeEnlazada()
@@ -141,25 +143,6 @@ void ListaDoblementeEnlazada::addAt(int pos, char c)
     sizeElements++;
 }
 
-/*void ListaDoblementeEnlazada::splitWords()
-{
-    Nodo *nd = first->next;
-    string aux;
-    while(nd != last)
-    {
-        if(nd->letter != ' ')
-        {
-            aux += nd->letter;
-        }
-        else
-        {
-            words->addWord(aux);
-            aux = "";
-        }
-        nd = nd->next;
-    }
-}*/
-
 void ListaDoblementeEnlazada::deleteAt(int x, int y)
 {
     int pos = 166*y + x;
@@ -205,6 +188,39 @@ void ListaDoblementeEnlazada::refreshList(string replaced)
     {
         addLast(replaced[i]);
     }
+}
+
+void ListaDoblementeEnlazada::graph()
+{
+    string grafo = "digraph A{node[fontname =Arial];\n";
+    Nodo *nd = this->first->next;
+    int cont = 0;
+    while(nd != last)
+    {
+        grafo+= "n" + to_string(cont) + "[label=\"" + nd->letter + "\"]\n";
+        cont++;
+        nd = nd->next;
+    }
+    int cont2 = 0;
+
+    while (cont2  < cont)
+    {
+        if(cont - 1 != cont2)
+        {
+            grafo+="n"+to_string(cont - cont2 -1)+" -> ";
+        }
+        else
+        {
+            grafo+="n"+to_string(cont - cont2 -1)+"[dir=\"both\"]\n}";
+        }
+        cont2++;
+    }
+    fstream archivo;
+    archivo.open("C:/Users/jose5/listaDoble.dot", ios::out);
+    archivo << grafo;
+    archivo.close();
+    system("dot.exe  -Tpng C:/Users/jose5/listaDoble.dot -o C:/Users/jose5/grafo.png");
+    system("start C:/Users/jose5/grafo.png");
 }
 
 #endif // LISTADOBLEMENTEENLAZADA_H
